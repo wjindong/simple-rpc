@@ -1,4 +1,4 @@
-package com.netty.rpc.registry.bean;
+package com.simple.rpc.registry.bean;
 
 import java.io.Serializable;
 import java.util.List;

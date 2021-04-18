@@ -1,4 +1,4 @@
-package com.netty.rpc.registry;
+package com.simple.rpc.registry;
 
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
@@ -29,7 +29,7 @@ public class ZkUtil {
     //服务注册中心目录
     public final String REGISTRY_CENTER="/provider-information-center";
     //服务提供者的文件名
-    public final String PROVIDER_FILE_NAME= REGISTRY_CENTER+"/provider";
+    public final String PROVIDER_FILE_NAME= REGISTRY_CENTER+"/provider-";
 
     private CuratorFramework client=null;
 
@@ -74,7 +74,7 @@ public class ZkUtil {
         client.delete().forPath(path);
     }
 
-    public byte[] getNode(String path) throws Exception {
+    public byte[] getNodeData(String path) throws Exception {
         return client.getData().forPath(path);
     }
 

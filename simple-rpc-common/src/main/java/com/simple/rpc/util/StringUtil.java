@@ -1,7 +1,9 @@
-package com.netty.rpc.util;
+package com.simple.rpc.util;
+
+import com.alibaba.fastjson.JSON;
 
 public class StringUtil {
-    private static final String ServiceName_Version_Delimiter=":";
+    public static final String ServiceName_Version_Delimiter=":";
 
     /**
      * 根据服务接口名称和版本返回key
@@ -37,5 +39,16 @@ public class StringUtil {
         }
 
         return true;
+    }
+
+    /**
+     * 将对象转化为 JSON 字符串
+     */
+    public static String ObjectToJson(Object obj){
+        return JSON.toJSONString(obj);
+    }
+
+    public static Object JsonToObject(String json,Class<?> classType){
+        return JSON.parseObject(json,classType);
     }
 }

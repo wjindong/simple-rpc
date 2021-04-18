@@ -1,6 +1,6 @@
-package com.app.test;
+package com.unit.test;
 
-import com.netty.rpc.server.ServiceProviderCore;
+import com.simple.rpc.server.ServiceProviderCore;
 
 public class UnitTest {
     public static void main(String[] args) {
