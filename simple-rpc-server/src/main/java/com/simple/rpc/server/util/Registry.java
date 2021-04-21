@@ -22,7 +22,6 @@ public class Registry {
 
     public Registry(String registerAddress){
         zkUtil=new ZkUtil(registerAddress);
-
     }
 
     /**
@@ -85,7 +84,7 @@ public class Registry {
     /**
      * 关闭服务时，清除写入到注册中心的数据
      */
-    public void clearRegistry(){
+    public void clearAndCloseRegistry(){
         try {
             zkUtil.deleteNode(zkNodePath);
             zkUtil.close();

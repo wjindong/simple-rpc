@@ -9,11 +9,14 @@ import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.DelimiterBasedFrameDecoder;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.concurrent.ThreadPoolExecutor;
 
 public class ProviderChannelInitializer extends ChannelInitializer<SocketChannel> {
+    private static final Logger logger= LoggerFactory.getLogger(ProviderChannelInitializer.class);
 
     private Map<String, Object> serviceBeanMap;
     private ThreadPoolExecutor rpcWorkerThreadPool;
@@ -21,7 +24,7 @@ public class ProviderChannelInitializer extends ChannelInitializer<SocketChannel
     public ProviderChannelInitializer(Map<String, Object> serviceBeanMap,ThreadPoolExecutor rpcWorkerThreadPool){
         this.serviceBeanMap=serviceBeanMap;
         this.rpcWorkerThreadPool=rpcWorkerThreadPool;
-        System.out.println("server bean:"+serviceBeanMap);
+
     }
 
     ///TODO

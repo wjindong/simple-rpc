@@ -12,7 +12,6 @@ import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.ThreadPoolExecutor;
 
-///TODO
 public class ProviderChannelHandler extends SimpleChannelInboundHandler<Request> {
     private static final Logger logger = LoggerFactory.getLogger(ProviderChannelHandler.class);
     private static long callTimes=0;
@@ -23,6 +22,7 @@ public class ProviderChannelHandler extends SimpleChannelInboundHandler<Request>
     public ProviderChannelHandler(Map<String,Object> serviceBeanMap, ThreadPoolExecutor rpcWorkerThreadPool){
         this.serviceBeanMap=serviceBeanMap;
         this.rpcWorkerThreadPool=rpcWorkerThreadPool;
+        logger.info("server bean:{}",serviceBeanMap);
     }
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Request request) throws Exception {
@@ -37,7 +37,6 @@ public class ProviderChannelHandler extends SimpleChannelInboundHandler<Request>
             try{
                 Object res=call(request);
                 response.setResult(res);
-                System.out.println(res);
             }catch (Throwable e){
                 response.setThrowableMessage(e.getMessage());
             }
@@ -50,32 +49,19 @@ public class ProviderChannelHandler extends SimpleChannelInboundHandler<Request>
      * 通过反射执行任务，返回结果
      */
     private Object call(Request request) throws Throwable{
-        String className = request.getServiceInterface();
-        String version = request.getServiceVersion();
-        String serviceKey = StringUtil.makeServiceKey(className,version);
-        Object serviceBean = serviceBeanMap.get(serviceKey);
-        if (serviceBean == null) {
-            logger.error("Can not find service implement with interface name: {} and version: {}", className, version);
+        String key=StringUtil.makeServiceKey(request.getServiceInterface(),request.getServiceVersion());
+        Object serviceBean=serviceBeanMap.get(key);
+        if(serviceBean==null){
+            logger.error("请求了不存在的服务");
             return null;
         }
 
-        Class<?> serviceClass = serviceBean.getClass();
-        String methodName = request.getMethodName();
-        Class<?>[] parameterTypes = request.getParameterTypes();
-        Object[] parameters = request.getParameters();
+        Class<?> serviceClass=serviceBean.getClass();
+        String methodName=request.getMethodName();
+        Class<?>[] parameterTypes= request.getParameterTypes();
+        Object[] parameters= request.getParameters();
 
-        logger.debug(serviceClass.getName());
-        logger.debug(methodName);
-        for (int i = 0; i < parameterTypes.length; ++i) {
-            logger.debug(parameterTypes[i].getName());
-        }
-        for (int i = 0; i < parameters.length; ++i) {
-            logger.debug(parameters[i].toString());
-        }
-
-        // JDK reflect
-        Method method = serviceClass.getMethod(methodName, parameterTypes);
-        method.setAccessible(true);
-        return method.invoke(serviceBean, parameters);
+        Method method=serviceClass.getMethod(methodName,parameterTypes);
+        return method.invoke(serviceBean,parameters);
     }
 }

@@ -25,7 +25,7 @@ public class ObjectToByteHandler extends MessageToByteEncoder {
         try {
             byte[] data = serializer.serialize(msg);
             //先写入数据长度，再写入数据。处理TCP粘包
-            out.writeInt(data.length);
+            out.writeShort(data.length);
             out.writeBytes(data);
         } catch (Exception e) {
             logger.error("ObjectToByteHandler error: " + e.toString());

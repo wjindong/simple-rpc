@@ -23,6 +23,7 @@ public class ServiceProviderCore {
 
     private Thread providerWorkThread;  //Server工作线程
     private String providerAddress; //服务地址 IP+port
+
     private Map<String, Object> serviceBeanMap = new HashMap<>(); //服务名与对应的服务实例映射
     private EventLoopGroup bossGroup = new NioEventLoopGroup();
     private EventLoopGroup workerGroup = new NioEventLoopGroup();
@@ -62,15 +63,17 @@ public class ServiceProviderCore {
             String[] ipAndPort = providerAddress.split(":");
             String ip = ipAndPort[0];
             int port = Integer.parseInt(ipAndPort[1]);
+
             try {
 
                 //启动Netty服务，监听端口
                 ChannelFuture future = startNetty(ip, port);
+                future.sync(); //确保Netty启动成功后才向Zk写信息
+                logger.info("服务器启动，监听 {} 端口", port);
 
                 //向zookeeper注册服务
                 serviceRegistry.serviceInfoToRegistry(providerAddress, serviceBeanMap.keySet());
 
-                logger.info("服务器启动，监听 {} 端口", port);
 
                 future.channel().closeFuture().sync();
             } catch (Exception e) {
@@ -82,7 +85,7 @@ public class ServiceProviderCore {
             } finally {
                 try {
                     //删除zookeeper中的数据
-                    serviceRegistry.clearRegistry();
+                    serviceRegistry.clearAndCloseRegistry();
                     workerGroup.shutdownGracefully();
                     bossGroup.shutdownGracefully();
                 } catch (Exception e) {

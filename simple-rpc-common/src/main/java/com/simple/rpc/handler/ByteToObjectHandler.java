@@ -40,9 +40,9 @@ public class ByteToObjectHandler extends ByteToMessageDecoder {
 //        byte[] data = new byte[dataLength];
         byte[]data=new byte[in.readableBytes()];
         in.readBytes(data);
-        Object obj = null;
+        //Object obj = null;
         try {
-            obj = serializer.deserialize(data, classType);
+            Object obj = serializer.deserialize(data, classType);
             out.add(obj);
         } catch (Exception e) {
             logger.error("ByteToObjectHandler error: " + e.toString());

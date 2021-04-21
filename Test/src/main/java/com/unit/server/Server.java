@@ -17,7 +17,6 @@ public class Server {
         rpcServer.addService(PersonService.class.getName(), "", personService);
         try {
             rpcServer.start();
-            Thread.sleep(5000);
         } catch (Exception ex) {
             System.err.println("Exception: "+ ex);
         }

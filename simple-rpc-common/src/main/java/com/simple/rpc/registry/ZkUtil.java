@@ -27,7 +27,7 @@ public class ZkUtil {
     //namespace作为zk中节点的顶级目录
     private final String ZK_NAME_SPACE="simple-rpc";
     //服务注册中心目录
-    public final String REGISTRY_CENTER="/provider-information-center";
+    public final String REGISTRY_CENTER="/provider-information";
     //服务提供者的文件名
     public final String PROVIDER_FILE_NAME= REGISTRY_CENTER+"/provider-";
 
