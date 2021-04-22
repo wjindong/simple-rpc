@@ -1,9 +1,10 @@
 package com.simple.rpc.bean;
 
 import java.io.Serializable;
+import java.util.Arrays;
 
 public class Request implements Serializable {
-    private Long requestId;
+    private String requestId;
     private String serviceInterface; //请求的服务接口
     private String serviceVersion; //请求的服务版本
 
@@ -13,11 +14,11 @@ public class Request implements Serializable {
 
 
     /////////////////  Getter and Setter  //////////////////////
-    public Long getRequestId() {
+    public String getRequestId() {
         return requestId;
     }
 
-    public void setRequestId(Long requestId) {
+    public void setRequestId(String requestId) {
         this.requestId = requestId;
     }
 
@@ -59,5 +60,17 @@ public class Request implements Serializable {
 
     public void setParameters(Object[] parameters) {
         this.parameters = parameters;
+    }
+
+    @Override
+    public String toString() {
+        return "Request{" +
+                "requestId='" + requestId + '\'' +
+                ", serviceInterface='" + serviceInterface + '\'' +
+                ", serviceVersion='" + serviceVersion + '\'' +
+                ", methodName='" + methodName + '\'' +
+                ", parameterTypes=" + Arrays.toString(parameterTypes) +
+                ", parameters=" + Arrays.toString(parameters) +
+                '}';
     }
 }

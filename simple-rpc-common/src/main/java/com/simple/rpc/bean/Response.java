@@ -3,17 +3,17 @@ package com.simple.rpc.bean;
 import java.io.Serializable;
 
 public class Response implements Serializable {
-    private Long requestId; //相应信息对应的请求id
+    private String requestId; //相应信息对应的请求id
     private String throwableMessage; //出现异常时的信息
     private Object result; //响应结果
 
 
     /////////////////  Getter and Setter ///////////////////////
-    public Long getRequestId() {
+    public String getRequestId() {
         return requestId;
     }
 
-    public void setRequestId(Long requestId) {
+    public void setRequestId(String requestId) {
         this.requestId = requestId;
     }
 

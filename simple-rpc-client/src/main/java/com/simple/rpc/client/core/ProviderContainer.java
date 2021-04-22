@@ -1,4 +1,4 @@
-package com.simple.rpc.client.util;
+package com.simple.rpc.client.core;
 
 
 import com.simple.rpc.client.balance.ProviderChoose;
@@ -11,6 +11,7 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.nio.NioSocketChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,15 +26,15 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * 管理所有与服务器建立的连接
  */
-public class ProviderContainer {
+public final class ProviderContainer {
     private static final Logger LOGGER= LoggerFactory.getLogger(ProviderContainer.class);
 
     //使用线程池异步连接服务器
     private static ThreadPoolExecutor connectionWorkerPool;
 
     //线程池中的所有线程公用，保证线程安全
-    private Map<ProviderInformation, ConsumerChannelHandler> connected = null;
-    private Set<ProviderInformation> connecting =null;
+    private Map<ProviderInformation, ConsumerChannelHandler> connected;
+    private Set<ProviderInformation> connecting;
 
     //此客户端的所有连接复用一个NioEventLoopGroup
     private EventLoopGroup eventLoopGroup = new NioEventLoopGroup(Runtime.getRuntime().availableProcessors());
@@ -47,7 +48,7 @@ public class ProviderContainer {
 
 
     // 防止关闭客户端后，还有线程在等待连接
-    private boolean isRunning=false;
+    private boolean isRunning;
 
     //单例模式，每个客户端只能有一个connection center
     private ProviderContainer(){
@@ -80,6 +81,7 @@ public class ProviderContainer {
     public void updateConnectedProvider(List<ProviderInformation> providerList){
         Set<ProviderInformation> newInfo= new HashSet<>();
         for(ProviderInformation provider:providerList) newInfo.add(provider);
+
         LOGGER.info(newInfo.toString());
 
         //连接新的服务提供者
@@ -130,15 +132,15 @@ public class ProviderContainer {
      * 如果还没连接任何服务器，此方法将阻塞，直到连接服务器后被唤醒
      * 此方法返回时，则至少与一台服务器建立了连接
      */
-    private void checkConnected(long time,TimeUnit timeUnit){
+    private void checkConnected(long waitTime,TimeUnit timeUnit){
         int connectedNum=connected.size();
         while(isRunning && connectedNum<=0){
             reentrantLock.lock();
             try{
                 LOGGER.info("没有连接到任何服务器，等待中...");
-                if(time==0)  condition.await();
+                if(waitTime==0)  condition.await();
                 else{
-                    condition.await(time,timeUnit);
+                    condition.await(waitTime,timeUnit);
                 }
                 connectedNum=connected.size(); //update
             } catch (InterruptedException e) {
@@ -177,7 +179,9 @@ public class ProviderContainer {
         connectionWorkerPool.execute(()->{
             Bootstrap bootstrap=new Bootstrap();
             bootstrap.group(eventLoopGroup)
+                    .channel(NioSocketChannel.class)
                     .handler(new ConsumerChannelInitializer());
+
             ChannelFuture channelFuture=bootstrap.connect(providerInformation.getProviderHost(),providerInformation.getProviderPort());
             channelFuture.addListener(new ChannelFutureListener() {
                 @Override

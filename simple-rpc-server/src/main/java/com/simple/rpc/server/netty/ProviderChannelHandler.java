@@ -26,7 +26,10 @@ public class ProviderChannelHandler extends SimpleChannelInboundHandler<Request>
     }
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Request request) throws Exception {
-        logger.info("server call times: {}",++callTimes);
+        logger.debug("server call times: {}",++callTimes);
+        if(callTimes%5000==0){
+            logger.info("server call times: {}",callTimes);
+        }
 
         //将任务提交线程池
         rpcWorkerThreadPool.execute(()->{

@@ -28,6 +28,7 @@ public class ByteToObjectHandler extends ByteToMessageDecoder {
         /**
          * 不用手动读取长度，直接在 LengthFieldBasedFrameDecoder 中跳过开头的长度域
          */
+
 //        if (in.readableBytes() < 4) {
 //            return;
 //        }
@@ -43,6 +44,7 @@ public class ByteToObjectHandler extends ByteToMessageDecoder {
         //Object obj = null;
         try {
             Object obj = serializer.deserialize(data, classType);
+            logger.debug(obj.toString());
             out.add(obj);
         } catch (Exception e) {
             logger.error("ByteToObjectHandler error: " + e.toString());

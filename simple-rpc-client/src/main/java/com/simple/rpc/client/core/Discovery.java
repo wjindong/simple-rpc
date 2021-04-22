@@ -1,4 +1,4 @@
-package com.simple.rpc.client.util;
+package com.simple.rpc.client.core;
 
 import com.simple.rpc.registry.ZkUtil;
 import com.simple.rpc.registry.bean.ProviderInformation;
@@ -83,5 +83,6 @@ public class Discovery {
 
     public void stop() {
         this.zkUtil.close();
+        ProviderContainer.getInstance().stop();
     }
 }
