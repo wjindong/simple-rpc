@@ -5,7 +5,7 @@ import com.app.test.*;
 import com.simple.rpc.server.ServiceProviderCore;
 
 public class Server {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         String serverAddress = "127.0.0.1:18878";
         String registryAddress = "192.168.163.128:2181";
         ServiceProviderCore rpcServer = new ServiceProviderCore(serverAddress, registryAddress);
@@ -21,5 +21,9 @@ public class Server {
             System.err.println("Exception: "+ ex);
         }
         System.out.println("ok...");
+
+        //Thread.sleep(1000*20);
+
+        //rpcServer.stop();
     }
 }

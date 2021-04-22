@@ -1,10 +1,13 @@
 package com.simple.rpc.server.netty;
 
-import com.simple.rpc.bean.Request;
-import com.simple.rpc.bean.Response;
+import com.simple.rpc.bean.*;
 import com.simple.rpc.util.StringUtil;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.handler.timeout.IdleState;
+import io.netty.handler.timeout.IdleStateEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,6 +29,19 @@ public class ProviderChannelHandler extends SimpleChannelInboundHandler<Request>
     }
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Request request) throws Exception {
+        if(Beat.BEAT_ID.equals(request.getRequestId())){
+            logger.info("收到客户端 {} 的心跳",ctx.channel().remoteAddress());
+            ctx.writeAndFlush(BeatToConsumer.PING).addListener(new ChannelFutureListener() {
+                @Override
+                public void operationComplete(ChannelFuture future) throws Exception {
+                    if(future.isSuccess()){
+                        logger.info("响应心跳成功");
+                    }
+                }
+            });
+            return;
+        }
+
         logger.debug("server call times: {}",++callTimes);
         if(callTimes%5000==0){
             logger.info("server call times: {}",callTimes);
@@ -71,6 +87,16 @@ public class ProviderChannelHandler extends SimpleChannelInboundHandler<Request>
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         super.channelInactive(ctx);
-        rpcWorkerThreadPool.shutdown();
+        logger.info("断开与 {} 的连接",ctx.channel().remoteAddress());
+    }
+
+    @Override
+    public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+        if(evt instanceof IdleStateEvent){
+            logger.error("客户端 {} 超时未响应，关闭连接",ctx.channel().remoteAddress());
+            ctx.close();
+        }else {
+            super.userEventTriggered(ctx,evt);
+        }
     }
 }

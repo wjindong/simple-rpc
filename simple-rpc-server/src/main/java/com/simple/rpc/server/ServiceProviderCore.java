@@ -28,6 +28,14 @@ public class ServiceProviderCore {
     private EventLoopGroup bossGroup = new NioEventLoopGroup();
     private EventLoopGroup workerGroup = new NioEventLoopGroup();
 
+    // 创建工作线程池，处理客户端调用请求
+    int processorNum = Runtime.getRuntime().availableProcessors();
+    private ThreadPoolExecutor rpcWorkerThreadPool = new ThreadPoolExecutor(
+            processorNum,
+            processorNum * 2,
+            60L, TimeUnit.SECONDS,
+            new LinkedBlockingDeque<>());
+
     //服务注册中心
     private Registry serviceRegistry = null;
 
@@ -85,10 +93,10 @@ public class ServiceProviderCore {
             } finally {
                 try {
                     //删除zookeeper中的数据
-                    future.channel().close();
                     serviceRegistry.clearAndCloseRegistry();
                     workerGroup.shutdownGracefully();
                     bossGroup.shutdownGracefully();
+                    rpcWorkerThreadPool.shutdown();
                 } catch (Exception e) {
                     logger.error(e.getMessage(), e);
                 }
@@ -111,15 +119,6 @@ public class ServiceProviderCore {
      * 开启Netty服务
      */
     private ChannelFuture startNetty(String ip, int port) throws InterruptedException {
-        // 创建工作线程池，处理客户端调用请求
-        int processorNum = Runtime.getRuntime().availableProcessors();
-        ThreadPoolExecutor rpcWorkerThreadPool = new ThreadPoolExecutor(
-                processorNum,
-                processorNum * 2,
-                60L, TimeUnit.SECONDS,
-                new LinkedBlockingDeque<>(5000),
-                new ThreadPoolExecutor.AbortPolicy());
-
         ServerBootstrap serverBootstrap = new ServerBootstrap();
         serverBootstrap.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class)
                 .childHandler(new ProviderChannelInitializer(serviceBeanMap, rpcWorkerThreadPool))

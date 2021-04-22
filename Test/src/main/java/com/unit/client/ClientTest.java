@@ -4,11 +4,21 @@ import com.app.test.service.HelloService;
 import com.simple.rpc.client.ServiceConsumerCore;
 
 public class ClientTest {
+    private static ServiceConsumerCore consumerCore=new ServiceConsumerCore("192.168.163.128:2181");
     public static void main(String[] args) throws InterruptedException {
-        ServiceConsumerCore consumerCore=new ServiceConsumerCore("192.168.163.128:2181");
 
-        int threadNum = 10;
-        final int requestNum = 100000;
+        doTest(5,10000);
+
+        Thread.sleep(1000*20000);
+
+        //doTest(5,10000);
+
+        //System.out.println("关闭client");
+        //consumerCore.stop();
+    }
+
+
+    private static void doTest(int threadNum,int requestNum) throws InterruptedException {
         Thread[] threads = new Thread[threadNum];
 
         long startTime = System.currentTimeMillis();
@@ -37,9 +47,5 @@ public class ClientTest {
         long time = (System.currentTimeMillis() - startTime);
         String msg = String.format("同步调用耗时:%sms, req/s=%s", time, ((double) (requestNum * threadNum)) / time * 1000);
         System.out.println(msg);
-
-        Thread.sleep(1000*10);
-        System.out.println("关闭client");
-        consumerCore.stop();
     }
 }
