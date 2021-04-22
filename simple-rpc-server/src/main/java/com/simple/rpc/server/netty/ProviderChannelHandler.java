@@ -67,4 +67,10 @@ public class ProviderChannelHandler extends SimpleChannelInboundHandler<Request>
         Method method=serviceClass.getMethod(methodName,parameterTypes);
         return method.invoke(serviceBean,parameters);
     }
+
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        super.channelInactive(ctx);
+        rpcWorkerThreadPool.shutdown();
+    }
 }

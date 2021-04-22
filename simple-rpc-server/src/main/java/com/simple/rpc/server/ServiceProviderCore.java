@@ -64,17 +64,17 @@ public class ServiceProviderCore {
             String ip = ipAndPort[0];
             int port = Integer.parseInt(ipAndPort[1]);
 
+            ChannelFuture future = null;
             try {
 
                 //启动Netty服务，监听端口
-                ChannelFuture future = startNetty(ip, port);
+                future = startNetty(ip, port);
                 future.sync(); //确保Netty启动成功后才向Zk写信息
                 logger.info("服务器启动，监听 {} 端口", port);
 
                 //向zookeeper注册服务
                 serviceRegistry.serviceInfoToRegistry(providerAddress, serviceBeanMap.keySet());
-
-
+                
                 future.channel().closeFuture().sync();
             } catch (Exception e) {
                 if (e instanceof InterruptedException) {
@@ -85,6 +85,7 @@ public class ServiceProviderCore {
             } finally {
                 try {
                     //删除zookeeper中的数据
+                    future.channel().close();
                     serviceRegistry.clearAndCloseRegistry();
                     workerGroup.shutdownGracefully();
                     bossGroup.shutdownGracefully();
