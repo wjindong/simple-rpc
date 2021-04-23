@@ -40,11 +40,46 @@ public class FutureResult implements Future<Object> {
         syn.release(1);
     }
 
+    /**
+     * 指定等待时间，获取数据
+     * @param timeout 最长等待时间
+     * @param timeUnit 时间单位
+     * @return 如果在指定的时间内获取结果成功，返回对应结果。 如果超时/返回结果中有异常信息 返回 null
+     * @throws InterruptedException
+     */
     @Override
-    public Object get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-        throw new  UnsupportedOperationException();
+    public Object get(long timeout, TimeUnit timeUnit) throws InterruptedException{
+        boolean flag=syn.tryAcquireNanos(1,timeUnit.toNanos(timeout));
+        if(flag){
+            return get();
+        }else{
+            LOGGER.error("get 超时");
+            return null;
+        }
     }
 
+    /**
+     * 获取可能出现的异常信息
+     */
+    public String getErrorMsg(){
+        //先要有返回值
+        get();
+        if(response!=null){
+            return response.getThrowableMessage();
+        }else{
+            return null;
+        }
+    }
+
+    public String getErrorMsg(long timeout, TimeUnit timeUnit) throws Exception{
+        //先要有返回值
+        get(timeout,timeUnit);
+        if(response!=null){
+            return response.getThrowableMessage();
+        }else{
+            return null;
+        }
+    }
 
     private static final class Syn extends AbstractQueuedSynchronizer{
 

@@ -1,20 +1,27 @@
 package com.unit.client;
 
 import com.app.test.service.HelloService;
+import com.app.test.service.Math;
+import com.app.test.service.MathImpl;
+import com.app.test.service.Person;
 import com.simple.rpc.client.ServiceConsumerCore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ClientTest {
+    private static Logger logger= LoggerFactory.getLogger(ClientTest.class);
+
     private static ServiceConsumerCore consumerCore=new ServiceConsumerCore("192.168.163.128:2181");
     public static void main(String[] args) throws InterruptedException {
+        Math math=consumerCore.createService(Math.class,"1.0");
 
-        doTest(5,10000);
+        try{
+            double a = math.divide(5.0,0.0);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
 
-        Thread.sleep(1000*20000);
-
-        //doTest(5,10000);
-
-        //System.out.println("关闭client");
-        //consumerCore.stop();
+        doTest(10,10000);
     }
 
 
@@ -22,17 +29,14 @@ public class ClientTest {
         Thread[] threads = new Thread[threadNum];
 
         long startTime = System.currentTimeMillis();
-        //benchmark for sync call
+
         for (int i = 0; i < threadNum; ++i) {
             threads[i] = new Thread(() -> {
                 for (int i1 = 0; i1 < requestNum; i1++) {
                     try {
                         final HelloService syncClient = consumerCore.createService(HelloService.class, "1.0");
-                        String result = syncClient.hello(Integer.toString(i1));
-                        if (!result.equals("Hello " + i1)) {
-                            System.err.println("error = " + result);
-                            System.exit(0);
-                        }
+                        String result = syncClient.hello(new Person("wang","-123"));
+                        //logger.info(result);
                     } catch (Exception ex) {
                         ex.printStackTrace();
                     }

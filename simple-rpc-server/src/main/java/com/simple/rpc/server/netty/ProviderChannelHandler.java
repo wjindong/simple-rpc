@@ -14,10 +14,13 @@ import org.slf4j.LoggerFactory;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.atomic.LongAdder;
 
 public class ProviderChannelHandler extends SimpleChannelInboundHandler<Request> {
     private static final Logger logger = LoggerFactory.getLogger(ProviderChannelHandler.class);
-    private static long callTimes=0;
+
+    //handler调用次数计数
+    private static LongAdder callTimes=new LongAdder();
 
     private Map<String,Object> serviceBeanMap=null;
     private ThreadPoolExecutor rpcWorkerThreadPool=null;
@@ -29,6 +32,7 @@ public class ProviderChannelHandler extends SimpleChannelInboundHandler<Request>
     }
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Request request) throws Exception {
+        //心跳包响应
         if(Beat.BEAT_ID.equals(request.getRequestId())){
             logger.info("收到客户端 {} 的心跳",ctx.channel().remoteAddress());
             ctx.writeAndFlush(BeatToConsumer.PING).addListener(new ChannelFutureListener() {
@@ -42,11 +46,11 @@ public class ProviderChannelHandler extends SimpleChannelInboundHandler<Request>
             return;
         }
 
-        logger.debug("server call times: {}",++callTimes);
-        if(callTimes%5000==0){
-            logger.info("server call times: {}",callTimes);
+        callTimes.increment();
+        logger.debug("server call times: {}",callTimes.longValue());
+        if(callTimes.longValue()%5000==0){
+            logger.info("server call times: {}",callTimes.longValue());
         }
-
         //将任务提交线程池
         rpcWorkerThreadPool.execute(()->{
             //1.设置请求id
@@ -56,10 +60,13 @@ public class ProviderChannelHandler extends SimpleChannelInboundHandler<Request>
             try{
                 Object res=call(request);
                 response.setResult(res);
-            }catch (Throwable e){
-                response.setThrowableMessage(e.getMessage());
+            }catch (Exception e){
+                logger.info(e.toString());
+                response.setThrowableMessage(e.toString());
+                logger.error("出现异常");
             }
             //3.将response写入管道，返回给客户端
+            //logger.info(StringUtil.ObjectToJson(response));
             ctx.writeAndFlush(response);
         });
     }
@@ -67,12 +74,12 @@ public class ProviderChannelHandler extends SimpleChannelInboundHandler<Request>
     /**
      * 通过反射执行任务，返回结果
      */
-    private Object call(Request request) throws Throwable{
+    private Object call(Request request) throws Exception{
         String key=StringUtil.makeServiceKey(request.getServiceInterface(),request.getServiceVersion());
         Object serviceBean=serviceBeanMap.get(key);
         if(serviceBean==null){
             logger.error("请求了不存在的服务");
-            return null;
+            throw new Exception("请求了不存在的服务:"+key);
         }
 
         Class<?> serviceClass=serviceBean.getClass();

@@ -118,7 +118,7 @@ public class ServiceProviderCore {
     /**
      * 开启Netty服务
      */
-    private ChannelFuture startNetty(String ip, int port) throws InterruptedException {
+    private ChannelFuture startNetty(String ip, int port) {
         ServerBootstrap serverBootstrap = new ServerBootstrap();
         serverBootstrap.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class)
                 .childHandler(new ProviderChannelInitializer(serviceBeanMap, rpcWorkerThreadPool))
@@ -126,6 +126,6 @@ public class ServiceProviderCore {
                 .childOption(ChannelOption.SO_KEEPALIVE, true)
                 .childOption(ChannelOption.TCP_NODELAY, true);
 
-        return serverBootstrap.bind(ip, port).sync();
+        return serverBootstrap.bind(ip, port);
     }
 }
