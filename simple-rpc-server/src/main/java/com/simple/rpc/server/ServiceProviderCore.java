@@ -57,8 +57,8 @@ public class ServiceProviderCore {
         this.serviceRegistry = new Registry(serviceRegistryAddress);
     }
 
-    public void addService(String serviceName, String serviceVersion, Object bean) {
-        String s = StringUtil.makeServiceKey(serviceName, serviceVersion);
+    public void addService(Class<?> serviceInterface, String serviceVersion, Object bean) {
+        String s = StringUtil.makeServiceKey(serviceInterface.getName(), serviceVersion);
         logger.info(s + "," + bean + "  added to map");
         serviceBeanMap.put(s, bean);
     }

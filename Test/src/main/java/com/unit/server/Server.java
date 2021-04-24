@@ -12,7 +12,7 @@ public class Server {
 
         ServiceProviderCore rpcServer = new ServiceProviderCore(serverAddress, registryAddress);
 
-        rpcServer.addService(HelloService.class.getName(), "1.0", new HelloServiceImpl());
+        rpcServer.addService(HelloService.class, "1.0", new HelloServiceImpl());
 
         try {
             rpcServer.start(); //开始提供服务
