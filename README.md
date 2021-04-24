@@ -11,7 +11,7 @@ RPC framework enables callers to call remote services as easily and transparentl
 * Support synchronous call and asynchronous call
 
 ## Getting started
-*See [samples] on GitHub.*
+*See [ samples ](https://github.com/wjindong/simple-rpc/tree/master/samples) on GitHub.*
 ### Define service interfaces
 ```java
 package com.simple.rpc.samples.api;
