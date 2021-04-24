@@ -1,1 +1,1 @@
-# A simple rpc framework based on Netty , Zookeeper
+# A simple RPC framework
