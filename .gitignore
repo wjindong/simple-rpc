@@ -1,5 +1,8 @@
 # .gitignore for intellij,java,maven,windows,osx
 
+### Test ###
+Test
+
 ### Intellij ###
 .idea
 .idea_modules/
