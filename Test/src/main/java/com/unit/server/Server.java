@@ -12,7 +12,7 @@ public class Server {
 
         ServiceProviderCore rpcServer = new ServiceProviderCore(serverAddress, registryAddress);
 
-        rpcServer.addService(HelloService.class, "1.0", new HelloServiceImpl());
+
 
         try {
             rpcServer.start(); //开始提供服务
@@ -21,8 +21,12 @@ public class Server {
         }
         System.out.println("ok...");
 
-        //Thread.sleep(1000*20);
+        Thread.sleep(1000*10);
+        rpcServer.addService(HelloService.class, "1.0", new HelloServiceImpl());
+        rpcServer.updateZookeeper();
 
-        //rpcServer.stop();
+        Thread.sleep(1000*10);
+        rpcServer.stop();
+
     }
 }

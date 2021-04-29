@@ -26,8 +26,8 @@ public class Registry {
 
     /**
      * 将provider的信息写入注册中心
-     * @param providerAddress provider的ip+port
-     * @param serviceKeys provider提供的所有服务的信息
+     * @param providerAddress provider的 ip:port
+     * @param serviceKeys provider提供的所有服务的信息 String: className:version
      */
     public void serviceInfoToRegistry(String providerAddress, Set<String> serviceKeys) {
         String[] ipAndPort = providerAddress.split(":");
@@ -38,7 +38,6 @@ public class Registry {
 
         for(String serviceKey:serviceKeys){
             ServiceInformation serviceInformation=new ServiceInformation();
-
 
             String[]serviceInfo=serviceKey.split(StringUtil.ServiceName_Version_Delimiter);
             serviceInformation.setServiceInterface(serviceInfo[0]);
@@ -89,8 +88,22 @@ public class Registry {
             zkUtil.deleteNode(zkNodePath);
             zkUtil.close();
         } catch (Exception e) {
-            logger.error("remove information from zk exception");
+            logger.error("close zk exception");
             e.printStackTrace();
+        }
+    }
+
+    /**
+     * 更新zk时，先清除写入到注册中心的数据
+     */
+    public void clearRegistry(){
+        if(zkNodePath!=null){
+            try {
+                zkUtil.deleteNode(zkNodePath);
+            } catch (Exception e) {
+                logger.error("remove information from zk exception");
+                e.printStackTrace();
+            }
         }
     }
 }

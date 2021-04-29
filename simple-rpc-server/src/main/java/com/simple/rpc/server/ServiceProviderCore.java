@@ -25,8 +25,7 @@ public class ServiceProviderCore {
     private String providerAddress; //服务地址 IP+port
 
     private Map<String, Object> serviceBeanMap = new HashMap<>(); //服务名与对应的服务实例映射
-    private EventLoopGroup bossGroup = new NioEventLoopGroup();
-    private EventLoopGroup workerGroup = new NioEventLoopGroup();
+
 
     // 创建工作线程池，处理客户端调用请求
     int processorNum = Runtime.getRuntime().availableProcessors();
@@ -72,16 +71,29 @@ public class ServiceProviderCore {
             String ip = ipAndPort[0];
             int port = Integer.parseInt(ipAndPort[1]);
 
-            ChannelFuture future = null;
-            try {
+            EventLoopGroup bossGroup = new NioEventLoopGroup();
+            EventLoopGroup workerGroup = new NioEventLoopGroup();
 
+            try {
                 //启动Netty服务，监听端口
-                future = startNetty(ip, port);
+                ServerBootstrap serverBootstrap = new ServerBootstrap();
+                serverBootstrap.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class)
+                        .childHandler(new ProviderChannelInitializer(serviceBeanMap, rpcWorkerThreadPool))
+                        //.option(ChannelOption.SO_BACKLOG, 128)
+                        .childOption(ChannelOption.SO_KEEPALIVE, true)
+                        .childOption(ChannelOption.TCP_NODELAY, true);
+
+                ChannelFuture future = serverBootstrap.bind(ip, port);
                 future.sync(); //确保Netty启动成功后才向Zk写信息
-                logger.info("服务器启动，监听 {} 端口", port);
+                if(future.isSuccess()){
+                    logger.info("服务器启动，监听 {} 端口", port);
+                }else{
+                    logger.error("服务器启动失败");
+                    return;
+                }
 
                 //向zookeeper注册服务
-                serviceRegistry.serviceInfoToRegistry(providerAddress, serviceBeanMap.keySet());
+                updateZookeeper();
                 
                 future.channel().closeFuture().sync();
             } catch (Exception e) {
@@ -106,6 +118,14 @@ public class ServiceProviderCore {
     }
 
     /**
+     * 向zk更新服务提供信息
+     */
+    public void updateZookeeper(){
+        serviceRegistry.clearRegistry();
+        serviceRegistry.serviceInfoToRegistry(providerAddress, serviceBeanMap.keySet());
+    }
+
+    /**
      * 停止服务器
      * 打断 providerWorkThread
      */
@@ -113,19 +133,5 @@ public class ServiceProviderCore {
         if (providerWorkThread != null && providerWorkThread.isAlive()) {
             providerWorkThread.interrupt(); //不能用stop停止线程！！！
         }
-    }
-
-    /**
-     * 开启Netty服务
-     */
-    private ChannelFuture startNetty(String ip, int port) {
-        ServerBootstrap serverBootstrap = new ServerBootstrap();
-        serverBootstrap.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class)
-                .childHandler(new ProviderChannelInitializer(serviceBeanMap, rpcWorkerThreadPool))
-                //.option(ChannelOption.SO_BACKLOG, 128)
-                .childOption(ChannelOption.SO_KEEPALIVE, true)
-                .childOption(ChannelOption.TCP_NODELAY, true);
-
-        return serverBootstrap.bind(ip, port);
     }
 }
