@@ -1,9 +1,6 @@
 # A simple RPC framework
 RPC framework enables callers to call remote services as easily and transparently as local methods. This project is a demo of a RPC framework,uses Netty as the network communication component and Zookeeper as the service registry.
 
-## Architecture
-![image](https://user-images.githubusercontent.com/27358409/115946873-a4e03800-a4f6-11eb-85c1-f83aa9d78326.png)
-
 ## Features
 * Interface oriented transparent remote method call based on dynamic proxy
 * The problem of TCP packet sticking and unpacking is solved, and the heartbeat detection between client and server is realized

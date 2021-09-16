@@ -18,7 +18,7 @@ public class Application {
 
         //Asynchronous call
         AsyncClient asyncClient=client.createAsyncService(GreetingsService.class,"1.0");
-        FutureResult result = asyncClient.call("sayHi","simple-rpc");
+        FutureResult result = asyncClient.call("sayHi","simple-rpc-asy ");
 
         res = (String) result.get(3, TimeUnit.SECONDS);
         String error=result.getErrorMsg(3, TimeUnit.SECONDS);
