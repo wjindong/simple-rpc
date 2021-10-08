@@ -15,7 +15,7 @@ public class StringUtil {
     public static String makeServiceKey(String name, String version) {
         String res = name;
         if (version != null && version.trim().length() > 0) {
-            res += ServiceName_Version_Delimiter.concat(version);
+            res = res.concat(ServiceName_Version_Delimiter.concat(version));
         }
         return res;
     }

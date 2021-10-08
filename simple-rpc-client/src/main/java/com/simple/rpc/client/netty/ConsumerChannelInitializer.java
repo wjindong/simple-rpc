@@ -7,6 +7,7 @@ import com.simple.rpc.handler.ByteToObjectHandler;
 import com.simple.rpc.handler.ObjectToByteHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
+import io.netty.handler.codec.FixedLengthFrameDecoder;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.timeout.IdleStateHandler;
 

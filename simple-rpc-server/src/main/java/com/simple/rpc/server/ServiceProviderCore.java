@@ -4,6 +4,7 @@ import com.simple.rpc.server.netty.ProviderChannelInitializer;
 import com.simple.rpc.server.util.Registry;
 import com.simple.rpc.util.StringUtil;
 import io.netty.bootstrap.ServerBootstrap;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
@@ -71,13 +72,15 @@ public class ServiceProviderCore {
             String ip = ipAndPort[0];
             int port = Integer.parseInt(ipAndPort[1]);
 
-            EventLoopGroup bossGroup = new NioEventLoopGroup();
+            EventLoopGroup bossGroup = new NioEventLoopGroup(1);
             EventLoopGroup workerGroup = new NioEventLoopGroup();
 
             try {
                 //启动Netty服务，监听端口
                 ServerBootstrap serverBootstrap = new ServerBootstrap();
-                serverBootstrap.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class)
+                serverBootstrap
+                        .group(bossGroup, workerGroup)
+                        .channel(NioServerSocketChannel.class)
                         .childHandler(new ProviderChannelInitializer(serviceBeanMap, rpcWorkerThreadPool))
                         //.option(ChannelOption.SO_BACKLOG, 128)
                         .childOption(ChannelOption.SO_KEEPALIVE, true)

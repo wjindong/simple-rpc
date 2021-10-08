@@ -6,9 +6,11 @@ import com.simple.rpc.server.ServiceProviderCore;
 public class Application {
     public static void main(String[] args) {
         String serverAddress = "127.0.0.1:18879";// provider address
-        String registryAddress = "192.168.163.128:2181"; //Zookeeper address
+        String zookeeperAddress = "192.168.163.128:2181";
+        //连接zk集群
+        //String zookeeperAddress = "192.168.163.128:2181,192.168.163.129:2181,...";
 
-        ServiceProviderCore provider = new ServiceProviderCore(serverAddress, registryAddress);
+        ServiceProviderCore provider = new ServiceProviderCore(serverAddress, zookeeperAddress);
         provider.addService(GreetingsService.class,"1.0",new GreetingsServiceImpl());
 
         provider.start();
