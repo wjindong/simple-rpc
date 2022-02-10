@@ -51,6 +51,7 @@ public class ProviderChannelHandler extends SimpleChannelInboundHandler<Request>
         if(callTimes.longValue()%5000==0){
             logger.info("server call times: {}",callTimes.longValue());
         }
+
         //将任务提交线程池
         rpcWorkerThreadPool.execute(()->{
             //1.设置请求id

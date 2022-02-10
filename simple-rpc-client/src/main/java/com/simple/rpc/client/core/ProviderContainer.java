@@ -79,8 +79,7 @@ public final class ProviderContainer {
      * @param providerList 新的服务提供者信息
      */
     public void updateConnectedProvider(List<ProviderInformation> providerList){
-        Set<ProviderInformation> newInfo= new HashSet<>();
-        for(ProviderInformation provider:providerList) newInfo.add(provider);
+        Set<ProviderInformation> newInfo= new HashSet<>(providerList);
 
         LOGGER.info(newInfo.toString());
 

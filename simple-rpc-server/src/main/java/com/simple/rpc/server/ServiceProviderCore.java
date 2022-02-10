@@ -3,13 +3,14 @@ package com.simple.rpc.server;
 import com.simple.rpc.server.netty.ProviderChannelInitializer;
 import com.simple.rpc.server.util.Registry;
 import com.simple.rpc.util.StringUtil;
+
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,10 +24,10 @@ public class ServiceProviderCore {
     private static final Logger logger = LoggerFactory.getLogger(ServiceProviderCore.class);
 
     private Thread providerWorkThread;  //Server工作线程
+
     private String providerAddress; //服务地址 IP+port
 
     private Map<String, Object> serviceBeanMap = new HashMap<>(); //服务名与对应的服务实例映射
-
 
     // 创建工作线程池，处理客户端调用请求
     int processorNum = Runtime.getRuntime().availableProcessors();
