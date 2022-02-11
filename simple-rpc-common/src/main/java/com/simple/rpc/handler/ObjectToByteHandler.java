@@ -32,7 +32,7 @@ public class ObjectToByteHandler extends MessageToByteEncoder {
             out.writeBytes(data);
 
         } catch (Exception e) {
-            logger.error("ObjectToByteHandler error: " + e.toString());
+            logger.error("ObjectToByteHandler error: " + e);
         }
     }
 }

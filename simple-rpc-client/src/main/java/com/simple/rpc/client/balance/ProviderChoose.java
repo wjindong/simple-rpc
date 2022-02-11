@@ -4,7 +4,6 @@ import com.simple.rpc.client.netty.ConsumerChannelHandler;
 import com.simple.rpc.registry.bean.ProviderInformation;
 import com.simple.rpc.registry.bean.ServiceInformation;
 import com.simple.rpc.util.StringUtil;
-import org.apache.commons.collections4.map.HashedMap;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,15 +13,15 @@ import java.util.Map;
 public interface ProviderChoose {
 
     /**
-     * 按provider按服务名分类
+     * provider按服务名分类
      *
      *  key1:{provider1,provider2,...}
      *  key2:{provider1,provider3,..}
      *
-     * @param connected
+     * @param connected 已经连接的节点与对应的 handler 映射表
      * @return   Map<String, List<RpcProtocol>> : String:serviceName:version , List: 有此服务的 ProviderInformation
      */
-    public default Map<String, List<ProviderInformation>> getServiceMap(Map<ProviderInformation, ConsumerChannelHandler> connected) {
+    default Map<String, List<ProviderInformation>> getServiceMap(Map<ProviderInformation, ConsumerChannelHandler> connected) {
 
         Map<String, List<ProviderInformation>> res = new HashMap<>();
         if (connected == null || connected.size() == 0) return res;
@@ -42,5 +41,5 @@ public interface ProviderChoose {
         return res;
     }
 
-    public ProviderInformation getProvider(String key, Map<ProviderInformation, ConsumerChannelHandler> map) throws Exception;
+    ProviderInformation getProvider(String key, Map<ProviderInformation, ConsumerChannelHandler> map) throws Exception;
 }

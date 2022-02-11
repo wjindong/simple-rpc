@@ -33,18 +33,18 @@ public final class ProviderContainer {
     private static ThreadPoolExecutor connectionWorkerPool;
 
     //线程池中的所有线程公用，保证线程安全
-    private Map<ProviderInformation, ConsumerChannelHandler> connected;
-    private Set<ProviderInformation> connecting;
+    private final Map<ProviderInformation, ConsumerChannelHandler> connected;
+    private final Set<ProviderInformation> connecting;
 
     //此客户端的所有连接复用一个NioEventLoopGroup
-    private EventLoopGroup eventLoopGroup = new NioEventLoopGroup(Runtime.getRuntime().availableProcessors());
+    private final EventLoopGroup eventLoopGroup = new NioEventLoopGroup(Runtime.getRuntime().availableProcessors());
 
     //实现通知等待模式
-    private ReentrantLock reentrantLock=new ReentrantLock();
-    private Condition condition=reentrantLock.newCondition();
+    private final ReentrantLock reentrantLock=new ReentrantLock();
+    private final Condition condition=reentrantLock.newCondition();
 
     //路由策略
-    private ProviderChoose providerChoose=new ProviderChooseByLRU();
+    private final ProviderChoose providerChoose=new ProviderChooseByLRU();
 
 
     // 防止关闭客户端后，还有线程在等待连接
@@ -61,7 +61,9 @@ public final class ProviderContainer {
         connecting =new CopyOnWriteArraySet<>();
         isRunning=true;
     }
+
     private static volatile ProviderContainer instance=null;
+
     public static ProviderContainer getInstance(){
         if(instance==null){
             synchronized (ProviderContainer.class){
@@ -164,7 +166,7 @@ public final class ProviderContainer {
 
     /**
      * 连接到指定的 provider
-     * @param providerInformation
+     * @param providerInformation 将要连接的 provider 信息
      */
     private void connectProvider(ProviderInformation providerInformation){
         //若此provider没有提供任何服务，则不建立连接
@@ -182,29 +184,26 @@ public final class ProviderContainer {
                     .handler(new ConsumerChannelInitializer());
 
             ChannelFuture channelFuture=bootstrap.connect(providerInformation.getProviderHost(),providerInformation.getProviderPort());
-            channelFuture.addListener(new ChannelFutureListener() {
-                @Override
-                public void operationComplete(ChannelFuture future) throws Exception {
-                    if(channelFuture.isSuccess()){
+            channelFuture.addListener((ChannelFutureListener) future -> {
+                if(channelFuture.isSuccess()){
 
-                        ConsumerChannelHandler handler=channelFuture.channel().pipeline().get(ConsumerChannelHandler.class);
+                    ConsumerChannelHandler handler=channelFuture.channel().pipeline().get(ConsumerChannelHandler.class);
 
-                        if(connecting.contains(providerInformation)){
-                            //将 handler 存入 Map
-                            connected.put(providerInformation,handler);
-                            handler.setProvider(providerInformation);
-                            //唤醒等待的线程
-                            notifyAllWaiter();
-                        }else{
-                            //说明在连接的过程中，provider已经下线
-                            LOGGER.info("连接建立成功，但 {} 已下线，释放连接!",providerInformation.getProviderHost()+":"+providerInformation.getProviderPort());
-                            handler.close();
-                        }
+                    if(connecting.contains(providerInformation)){
+                        //将 handler 存入 Map
+                        connected.put(providerInformation,handler);
+                        handler.setProvider(providerInformation);
+                        //唤醒等待的线程
+                        notifyAllWaiter();
                     }else{
-                        //连接失败则删除set中的信息
-                        connecting.remove(providerInformation);
-                        LOGGER.error("连接失败。address:{}:{}",providerInformation.getProviderHost(),providerInformation.getProviderPort());
+                        //说明在连接的过程中，provider已经下线
+                        LOGGER.info("连接建立成功，但 {} 已下线，释放连接!",providerInformation.getProviderHost()+":"+providerInformation.getProviderPort());
+                        handler.close();
                     }
+                }else{
+                    //连接失败则删除set中的信息
+                    connecting.remove(providerInformation);
+                    LOGGER.error("连接失败。address:{}:{}",providerInformation.getProviderHost(),providerInformation.getProviderPort());
                 }
             });
 

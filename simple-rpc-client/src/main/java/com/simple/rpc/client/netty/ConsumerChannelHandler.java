@@ -7,24 +7,25 @@ import com.simple.rpc.bean.Response;
 import com.simple.rpc.client.core.ProviderContainer;
 import com.simple.rpc.client.future.FutureResult;
 import com.simple.rpc.registry.bean.ProviderInformation;
-import com.simple.rpc.util.StringUtil;
+
 import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.ConcurrentHashMap;
 
-//TODO
 public class ConsumerChannelHandler extends SimpleChannelInboundHandler<Response> {
     private static final Logger logger= LoggerFactory.getLogger(ConsumerChannelHandler.class);
 
     //当前channel对应的provider
     private ProviderInformation provider;
+
     // 存放未完成的PRC请求，等待服务端返回结果后进行处理  <requestId,FutureResult>
-    private ConcurrentHashMap<String, FutureResult> undone = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, FutureResult> undone = new ConcurrentHashMap<>();
 
     private Channel channel;
 
@@ -32,7 +33,7 @@ public class ConsumerChannelHandler extends SimpleChannelInboundHandler<Response
     private int pingRetryTimes=0;
 
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, Response msg) throws Exception {
+    protected void channelRead0(ChannelHandlerContext ctx, Response msg){
         if(Beat.BEAT_ID.equals(msg.getRequestId())){
             logger.info("收到服务端的响应");
             pingRetryTimes=0;
@@ -48,12 +49,9 @@ public class ConsumerChannelHandler extends SimpleChannelInboundHandler<Response
         FutureResult futureResult=new FutureResult(request);
         undone.put(request.getRequestId(),futureResult);
 
-        channel.writeAndFlush(request).addListener(new ChannelFutureListener() {
-            @Override
-            public void operationComplete(ChannelFuture future) throws Exception {
-                if(!future.isSuccess()){
-                    logger.error("发送请求失败,request id:{}",request.getRequestId());
-                }
+        channel.writeAndFlush(request).addListener((ChannelFutureListener) future -> {
+            if(!future.isSuccess()){
+                logger.error("发送请求失败,request id:{}",request.getRequestId());
             }
         });
         return futureResult;

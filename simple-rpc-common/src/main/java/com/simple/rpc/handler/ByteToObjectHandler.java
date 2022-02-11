@@ -15,8 +15,8 @@ import java.util.List;
  */
 public class ByteToObjectHandler extends ByteToMessageDecoder {
     private static final Logger logger = LoggerFactory.getLogger(ByteToObjectHandler.class);
-    private Class<?> classType; //转化的对象类型
-    private Serializer serializer= SerializerFactory.getInstance();
+    private final Class<?> classType; //转化的对象类型
+    private final Serializer serializer= SerializerFactory.getInstance();
 
     public ByteToObjectHandler(Class<?> classType){
         this.classType=classType;
@@ -24,10 +24,8 @@ public class ByteToObjectHandler extends ByteToMessageDecoder {
 
 
     @Override
-    protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
-        /**
-         * 不用手动读取长度，直接在 LengthFieldBasedFrameDecoder 中跳过开头的长度域
-         */
+    protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out){
+        //不用手动读取长度，直接在 LengthFieldBasedFrameDecoder 中跳过开头的长度域
 
 //        if (in.readableBytes() < 4) {
 //            return;
@@ -41,13 +39,13 @@ public class ByteToObjectHandler extends ByteToMessageDecoder {
 //        byte[] data = new byte[dataLength];
         byte[]data=new byte[in.readableBytes()];
         in.readBytes(data);
-        //Object obj = null;
+
         try {
             Object obj = serializer.deserialize(data, classType);
             logger.debug(obj.toString());
             out.add(obj);
         } catch (Exception e) {
-            logger.error("ByteToObjectHandler error: " + e.toString());
+            logger.error("ByteToObjectHandler error: " + e);
         }
     }
 }

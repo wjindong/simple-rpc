@@ -6,14 +6,14 @@ import com.simple.rpc.client.core.ProxyHandler;
 
 import java.lang.reflect.Proxy;
 
-//TODO
 public class ServiceConsumerCore {
-    private Discovery discovery;
+    private final Discovery discovery;
 
     public ServiceConsumerCore(String registryAddress){
         this.discovery=new Discovery(registryAddress);
     }
 
+    @SuppressWarnings("unchecked")
     public <T> T createService(Class<T> serviceClass,String serviceVersion){
         return (T)Proxy.newProxyInstance(serviceClass.getClassLoader(),new Class[]{serviceClass},
                 new ProxyHandler(serviceClass,serviceVersion));

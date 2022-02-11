@@ -4,9 +4,7 @@ import com.simple.rpc.registry.ZkUtil;
 import com.simple.rpc.registry.bean.ProviderInformation;
 import com.simple.rpc.registry.bean.ServiceInformation;
 import com.simple.rpc.util.StringUtil;
-import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.state.ConnectionState;
-import org.apache.curator.framework.state.ConnectionStateListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +15,7 @@ import java.util.Set;
 public class Registry {
     private static final Logger logger = LoggerFactory.getLogger(Registry.class);
 
-    private ZkUtil zkUtil;
+    private final ZkUtil zkUtil;
     private String zkNodePath;
 
     public Registry(String registerAddress){
@@ -66,16 +64,11 @@ public class Registry {
         }
         logger.info("write to zk :{}",zkNodePath);
 
-        /**
-         * 添加连接监听器，如果zookeeper断线后重连需要重新注册服务，否则会出现服务器启动，但zookeeper中没有注册信息的情况
-         */
-        zkUtil.addConnectionStateListener(new ConnectionStateListener() {
-            @Override
-            public void stateChanged(CuratorFramework curatorFramework, ConnectionState connectionState) {
-                if (connectionState == ConnectionState.RECONNECTED) {
-                    logger.info("zk重连，服务将会重新注册", connectionState);
-                    serviceInfoToRegistry(providerAddress, serviceKeys);
-                }
+        // 添加连接监听器，如果zookeeper断线后重连需要重新注册服务，否则会出现服务器启动，但zookeeper中没有注册信息的情况
+        zkUtil.addConnectionStateListener((curatorFramework, connectionState) -> {
+            if (connectionState == ConnectionState.RECONNECTED) {
+                logger.info("zk重连，服务将会重新注册", connectionState);
+                serviceInfoToRegistry(providerAddress, serviceKeys);
             }
         });
     }

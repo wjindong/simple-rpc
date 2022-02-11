@@ -5,17 +5,15 @@ import com.simple.rpc.bean.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.AbstractQueuedSynchronizer;
 
 public class FutureResult implements Future<Object> {
     private static final Logger LOGGER= LoggerFactory.getLogger(FutureResult.class);
 
-    private Request request=null;
-    private Response response=null;
+    private Request request;
+    private Response response;
 
     private final Syn syn;
 
@@ -45,7 +43,6 @@ public class FutureResult implements Future<Object> {
      * @param timeout 最长等待时间
      * @param timeUnit 时间单位
      * @return 如果在指定的时间内获取结果成功，返回对应结果。 如果超时/返回结果中有异常信息 返回 null
-     * @throws InterruptedException
      */
     @Override
     public Object get(long timeout, TimeUnit timeUnit) throws InterruptedException{
@@ -94,11 +91,7 @@ public class FutureResult implements Future<Object> {
         @Override
         protected boolean tryRelease(int arg) {
             if(getState()== undone){
-                if(compareAndSetState(undone,done)){
-                    return true;
-                }else{
-                    return false;
-                }
+                return compareAndSetState(undone, done);
             }else return true;
         }
 

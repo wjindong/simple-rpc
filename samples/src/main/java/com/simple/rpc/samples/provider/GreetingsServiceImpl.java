@@ -5,6 +5,6 @@ import com.simple.rpc.samples.api.GreetingsService;
 public class GreetingsServiceImpl implements GreetingsService {
     @Override
     public String sayHi(String name) {
-        return "hi "+name+"from provider";
+        return "hi "+name+" from provider";
     }
 }

@@ -27,11 +27,11 @@ public class ServiceProviderCore {
 
     private String providerAddress; //服务地址 IP+port
 
-    private Map<String, Object> serviceBeanMap = new HashMap<>(); //服务名与对应的服务实例映射
+    private final Map<String, Object> serviceBeanMap = new HashMap<>(); //服务名与对应的服务实例映射
 
     // 创建工作线程池，处理客户端调用请求
     int processorNum = Runtime.getRuntime().availableProcessors();
-    private ThreadPoolExecutor rpcWorkerThreadPool = new ThreadPoolExecutor(
+    private final ThreadPoolExecutor rpcWorkerThreadPool = new ThreadPoolExecutor(
             processorNum,
             processorNum * 2,
             60L, TimeUnit.SECONDS,
@@ -133,6 +133,7 @@ public class ServiceProviderCore {
      * 停止服务器
      * 打断 providerWorkThread
      */
+    @SuppressWarnings("unused")
     public void stop() {
         if (providerWorkThread != null && providerWorkThread.isAlive()) {
             providerWorkThread.interrupt(); //不能用stop停止线程！！！
