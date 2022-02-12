@@ -23,6 +23,7 @@ public class ServiceConsumerCore {
         return new ProxyHandler(serviceClass,serviceVersion);
     }
 
+    @SuppressWarnings("unused")
     public void stop(){
         discovery.stop();
     }
