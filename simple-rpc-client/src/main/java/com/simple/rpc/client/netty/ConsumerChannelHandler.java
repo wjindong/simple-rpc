@@ -43,6 +43,8 @@ public class ConsumerChannelHandler extends SimpleChannelInboundHandler<Response
         String requestId=msg.getRequestId();
         FutureResult futureResult=undone.get(requestId);
         futureResult.setResponse(msg);
+
+        undone.remove(requestId);
     }
 
     public FutureResult sendRequest(Request request){
