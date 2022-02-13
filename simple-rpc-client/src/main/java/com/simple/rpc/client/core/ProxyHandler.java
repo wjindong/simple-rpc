@@ -2,6 +2,7 @@ package com.simple.rpc.client.core;
 
 import com.simple.rpc.bean.Request;
 import com.simple.rpc.client.async.AsyncClient;
+import com.simple.rpc.client.exception.SendToServerException;
 import com.simple.rpc.client.future.FutureResult;
 import com.simple.rpc.client.netty.ConsumerChannelHandler;
 import com.simple.rpc.util.StringUtil;
@@ -47,7 +48,22 @@ public class ProxyHandler implements InvocationHandler, AsyncClient {
         String key= StringUtil.makeServiceKey(serviceClass.getName(),serviceVersion);
         ConsumerChannelHandler handler=ProviderContainer.getInstance().getHandler(key);
 
-        FutureResult result= handler.sendRequest(request);
+        FutureResult result=null;
+        try {
+            result= handler.sendRequest(request);
+        }catch (Exception e){
+            if(e instanceof SendToServerException){
+                //发送失败则重试一次
+                try {
+                    handler=ProviderContainer.getInstance().getHandler(key);
+                }catch (Exception e1){
+                    if(e1 instanceof SendToServerException){
+                        throw e1;
+                    }
+                }
+                result=handler.sendRequest(request);
+            }
+        }
 
         return result.get();
     }

@@ -5,6 +5,7 @@ import com.simple.rpc.bean.BeatToProvider;
 import com.simple.rpc.bean.Request;
 import com.simple.rpc.bean.Response;
 import com.simple.rpc.client.core.ProviderContainer;
+import com.simple.rpc.client.exception.SendToServerException;
 import com.simple.rpc.client.future.FutureResult;
 import com.simple.rpc.registry.bean.ProviderInformation;
 
@@ -47,13 +48,14 @@ public class ConsumerChannelHandler extends SimpleChannelInboundHandler<Response
         undone.remove(requestId);
     }
 
-    public FutureResult sendRequest(Request request){
+    public FutureResult sendRequest(Request request) throws Exception{
         FutureResult futureResult=new FutureResult(request);
         undone.put(request.getRequestId(),futureResult);
 
         channel.writeAndFlush(request).addListener((ChannelFutureListener) future -> {
             if(!future.isSuccess()){
                 logger.error("发送请求失败,request id:{}",request.getRequestId());
+                throw new SendToServerException(request.getRequestId(),"发送请求失败",provider);
             }
         });
         return futureResult;
