@@ -111,4 +111,11 @@ public class ConsumerChannelHandler extends SimpleChannelInboundHandler<Response
             super.userEventTriggered(ctx,evt);
         }
     }
+
+    /**
+     * @return 返回未完成的请求数量
+     */
+    public int getUndoneMapSize(){
+        return undone.size();
+    }
 }

@@ -2,7 +2,7 @@ package com.simple.rpc.client.core;
 
 
 import com.simple.rpc.client.balance.ProviderChoose;
-import com.simple.rpc.client.balance.impl.ProviderChooseByLRU;
+import com.simple.rpc.client.balance.impl.ProviderChooseByLeastActive;
 import com.simple.rpc.client.netty.ConsumerChannelHandler;
 import com.simple.rpc.client.netty.ConsumerChannelInitializer;
 import com.simple.rpc.registry.bean.ProviderInformation;
@@ -44,7 +44,7 @@ public final class ProviderContainer {
     private final Condition condition=reentrantLock.newCondition();
 
     //路由策略
-    private final ProviderChoose providerChoose=new ProviderChooseByLRU();
+    private final ProviderChoose providerChoose=new ProviderChooseByLeastActive();
 
 
     // 防止关闭客户端后，还有线程在等待连接

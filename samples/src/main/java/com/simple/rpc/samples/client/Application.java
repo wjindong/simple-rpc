@@ -9,7 +9,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 public class Application {
-    private static ServiceConsumerCore client=new ServiceConsumerCore("192.168.163.128:2181");
+    private static final ServiceConsumerCore client=new ServiceConsumerCore("192.168.163.128:2181");
 
     public static void main(String[] args) throws Exception {
         //Synchronous call
